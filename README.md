@@ -47,7 +47,7 @@ flowchart LR
     <td align="center"><strong>截图 OCR</strong><br><img src="docs/images/inbox-image.png" width="330" alt="上传通知截图并编辑 OCR 文字"></td>
   </tr>
   <tr>
-    <td align="center"><strong>AI Review</strong><br><img src="docs/images/ai-review.png" width="330" alt="检查和编辑 AI 提取的行动项"></td>
+    <td align="center"><strong>AI Review</strong><br><img src="docs/images/ai-review.png" width="330" alt="检查和编辑结构化行动项"><br><sub>合成课程通知用于展示确认交互</sub></td>
     <td align="center"><strong>待办日程</strong><br><img src="docs/images/tasks-mobile.png" width="330" alt="按日期分组的任务列表"></td>
   </tr>
 </table>
@@ -59,6 +59,17 @@ flowchart LR
 应用使用 `@earendil-works/pi-ai` 的 OpenAI provider、模型目录和 OAuth abstraction。设置页启动 **Continue with ChatGPT**，授权在 OpenAI 页面完成；服务端保存 OAuth credential，浏览器 JavaScript、业务表、日志和 Git 均不会接收 Token。
 
 每次提取都会向模型传入当前本地时间和时区。模型通过约束工具返回 `task | deadline | meeting | event`，并保留原始时间文字、来源摘录与置信度。不确定日期保持为空，最终写库由用户确认决定。
+
+### AI 工作流验证
+
+| 环节 | 状态 | 证据 |
+|---|---|---|
+| OpenAI 授权页与本地回调 | 已验证 | 两次真实浏览器授权均完成回调 |
+| OAuth Token 交换 | 当前受阻 | OpenAI 端返回 HTTP 403，未生成本地 credential |
+| Structured Output 契约 | 已验证 | TypeBox Schema 与异常路径自动化测试 |
+| Review、确认保存与持久化 | 已验证 | 浏览器流程测试与 SQLite 重启读取 |
+
+实时模型调用将在 OpenAI 为当前账号与环境开放 Token 交换后复验；仓库不以合成结果冒充真实模型响应。
 
 ## 技术架构
 
