@@ -43,9 +43,10 @@ export class CampusAi {
     const auth = await this.models.checkAuth('openai').catch(() => undefined);
     const connected = auth?.type === 'oauth';
     if (connected) this.loginState = 'connected';
+    const selectedModel = connected ? await this.selectModel() : undefined;
     return {
       connected, provider: 'openai', authLabel: 'Sign in with ChatGPT', planLabel: '使用 ChatGPT 计划',
-      model: connected ? this.selectModel()?.id ?? null : null,
+      model: selectedModel?.id ?? null,
       loginState: connected ? 'connected' : this.loginState,
       message: this.loginMessage,
     };
@@ -76,7 +77,7 @@ export class CampusAi {
 
   async extract(text: string, localDateTime: string, timezone: string): Promise<ExtractedItem[]> {
     if (!(await this.status()).connected) throw new AiError('AI_NOT_CONNECTED', 'ChatGPT 尚未连接');
-    const model = this.selectModel();
+    const model = await this.selectModel();
     if (!model) throw new AiError('MODEL_UNAVAILABLE', '当前没有可用的 ChatGPT 模型');
     try {
       const response = await this.models.complete(model, {
@@ -96,8 +97,8 @@ export class CampusAi {
     }
   }
 
-  private selectModel() {
-    const models = this.models.getModels('openai');
+  private async selectModel() {
+    const models = await this.models.getAvailable('openai');
     return models.find((model) => model.input.includes('text')) ?? models[0];
   }
 
