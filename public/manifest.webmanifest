@@ -1,0 +1,19 @@
+{
+  "name": "CampusFlow AI",
+  "short_name": "CampusFlow",
+  "description": "校园信息整理与行动助手",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#f4f8f7",
+  "theme_color": "#0f766e",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
