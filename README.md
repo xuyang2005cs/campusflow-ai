@@ -2,7 +2,7 @@
 
 **校园信息整理与行动助手**
 
-将群聊文字和聊天截图中的待办、截止日期、会议与活动，整理成可确认、可追踪的个人任务。
+将群聊文字和聊天截图中的待办、截止日期、会议与活动整理成可确认、可追踪的个人任务。
 
 [![CI](https://github.com/xuyang2005cs/campusflow-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/xuyang2005cs/campusflow-ai/actions/workflows/ci.yml)
 ![Node 22](https://img.shields.io/badge/Node-22.23-397053)
@@ -10,11 +10,11 @@
 ![Tests](https://img.shields.io/badge/tests-41%20passed-0F766E)
 ![License](https://img.shields.io/badge/license-MIT-17211F)
 
-<p align="center"><img src="docs/images/today-mobile.png" width="390" alt="CampusFlow AI 今日页面，展示日期条、进度、紧急任务和底部导航"></p>
+![CampusFlow AI：从校园通知到个人行动的移动端工作流](docs/images/campusflow-hero.png)
 
 ## 项目简介
 
-CampusFlow AI 面向课程群、实验室和社团通知带来的信息过载。它把用户主动粘贴的文字或上传的截图转换为结构化行动项；AI 结果必须经过可编辑的确认页面，才会写入本地 SQLite 任务库。产品以任务和截止日期为中心，不以聊天记录为中心。
+CampusFlow AI 面向课程群、实验室和社团通知带来的信息过载。它将用户主动粘贴的文字或上传的截图转换为结构化行动项；每一项结果都可以在确认页修改或取消选择，确认后才会写入本地 SQLite 任务库。产品围绕任务与截止日期组织信息，而不是保留聊天记录。
 
 ## 使用流程
 
@@ -23,53 +23,39 @@ flowchart LR
     A[群消息 / 通知截图] --> B[文字输入 / OCR]
     B --> C[AI 结构化提取]
     C --> D[人工检查与修改]
-    D --> E[SQLite 任务面板]
+    D --> E[SQLite]
     E --> F[今日 / 待办 / 完成]
 ```
 
-## 核心功能
+## 核心能力
 
-- 移动端优先的 Today 日程、七日日期条与截止紧急度
-- 手动创建、完成、恢复和按日期分组的任务管理
-- PNG、JPG、WEBP 截图的中英文 Tesseract.js OCR
-- OCR 文本编辑后再进入 AI 整理
-- Pi AI OpenAI provider 与 **Sign in with ChatGPT** OAuth
-- TypeBox Structured Output、相对时间上下文与结果校验
-- Review 中逐项编辑、取消选择和确认保存
-- SQLite 重启持久化与重复确认保护
-- PWA manifest、Service Worker 与桌面自适应布局
+| 能力 | 内容 |
+|---|---|
+| 信息输入 | 通知文字粘贴；PNG、JPG、WEBP 截图；中英文 OCR；识别文本可编辑 |
+| AI 整理 | Sign in with ChatGPT；Structured Output；相对时间解析；TypeBox Schema 校验 |
+| 任务管理 | Today 日程；截止紧急度；完成与恢复；SQLite 本地持久化 |
+| 工程质量 | Mobile-first PWA；Vitest；Playwright；GitHub Actions CI |
 
 ## 产品界面
 
 <table>
   <tr>
-    <td align="center"><strong>通知整理</strong><br><img src="docs/images/inbox-text.png" width="330" alt="粘贴校园通知文字"></td>
-    <td align="center"><strong>截图 OCR</strong><br><img src="docs/images/inbox-image.png" width="330" alt="上传通知截图并编辑 OCR 文字"></td>
+    <td align="center"><strong>通知输入</strong><br><img src="docs/images/inbox-text.png" width="330" alt="粘贴校园通知文字"></td>
+    <td align="center"><strong>AI 提取确认</strong><br><img src="docs/images/ai-review.png" width="330" alt="检查和编辑结构化行动项"></td>
   </tr>
   <tr>
-    <td align="center"><strong>AI Review</strong><br><img src="docs/images/ai-review.png" width="330" alt="检查和编辑结构化行动项"><br><sub>合成课程通知用于展示确认交互</sub></td>
     <td align="center"><strong>待办日程</strong><br><img src="docs/images/tasks-mobile.png" width="330" alt="按日期分组的任务列表"></td>
+    <td align="center"><strong>完成记录</strong><br><img src="docs/images/completed-mobile.png" width="330" alt="查看并恢复已完成任务"></td>
   </tr>
 </table>
 
-桌面端保留同一信息架构，通过紧凑侧轨和受控内容宽度扩展：[查看桌面截图](docs/images/today-desktop.png)。
+桌面端沿用同一信息架构，通过紧凑侧轨和受控内容宽度扩展：[查看桌面界面](docs/images/today-desktop.png)。
 
 ## AI 集成
 
-应用使用 `@earendil-works/pi-ai` 的 OpenAI provider、模型目录和 OAuth abstraction。设置页启动 **Continue with ChatGPT**，授权在 OpenAI 页面完成；服务端保存 OAuth credential，浏览器 JavaScript、业务表、日志和 Git 均不会接收 Token。
+CampusFlow AI 使用 `@earendil-works/pi-ai` 接入 OpenAI provider，并通过 **Sign in with ChatGPT** 完成 OAuth 授权。通知文本会结合本地时间与时区进入结构化提取流程，模型输出经过 TypeBox Schema 校验后进入 Review 页面，由用户确认后写入 SQLite。
 
-每次提取都会向模型传入当前本地时间和时区。模型通过约束工具返回 `task | deadline | meeting | event`，并保留原始时间文字、来源摘录与置信度。不确定日期保持为空，最终写库由用户确认决定。
-
-### AI 工作流验证
-
-| 环节 | 状态 | 证据 |
-|---|---|---|
-| OpenAI 授权页与本地回调 | 已验证 | 两次真实浏览器授权均完成回调 |
-| OAuth Token 交换 | 当前受阻 | OpenAI 端返回 HTTP 403，未生成本地 credential |
-| Structured Output 契约 | 已验证 | TypeBox Schema 与异常路径自动化测试 |
-| Review、确认保存与持久化 | 已验证 | 浏览器流程测试与 SQLite 重启读取 |
-
-实时模型调用将在 OpenAI 为当前账号与环境开放 Token 交换后复验；仓库不以合成结果冒充真实模型响应。
+提取结果支持 `task`、`deadline`、`meeting` 与 `event`，并保留 `original_time_text`、`source_excerpt` 和 `confidence`，便于用户核对时间表达、来源片段与结果可信度。OAuth credential 只保存在本机服务端，不会进入浏览器存储或业务数据表。
 
 ## 技术架构
 
@@ -77,7 +63,7 @@ flowchart LR
 React + Vite + TypeScript
         ↓ local API
 Node.js + Hono
-   ├── Tesseract.js OCR（浏览器）
+   ├── Tesseract.js OCR
    ├── Pi AI / OpenAI OAuth + Structured Output
    └── SQLite tasks + imports
 ```
@@ -86,18 +72,15 @@ Node.js + Hono
 
 ## 本地数据
 
-- `data/campusflow.db`：任务与导入记录
-- `.local/auth.json`：服务端 OAuth credential store
-- `.local/installation-id`：稳定的本机 installation ID
-
-以上文件均被 `.gitignore` 排除。首版不持久化上传的原始截图。
+任务与导入记录保存在本地 SQLite；OAuth credential 与稳定 installation ID 保存在 Git 忽略的本地目录中。上传的原始截图不持久化。
 
 ## 自动化测试
 
 | Suite | Result | Scope |
 |---|---:|---|
-| Vitest | 35 passed | SQLite、任务状态、紧急度、API、导入、Schema、AI 错误映射 |
-| Playwright | 6 passed | Router、底部导航、创建/完成/恢复、OCR 编辑、Review、OAuth 断开状态 |
+| Vitest | 35 passed | SQLite、任务状态、紧急度、API、导入、Schema 与 AI 错误映射 |
+| Playwright | 6 passed | Router、移动导航、任务生命周期、OCR 编辑与 Review 确认 |
+| Total | **41 passed** | 单元、集成与真实浏览器流程 |
 
 ```bash
 npm test
@@ -109,11 +92,11 @@ npm run test:e2e
 需要 Node.js 22.19.0 或更高版本。
 
 ```bash
-npm install --legacy-peer-deps
+npm install
 npm run dev
 ```
 
-打开 `http://127.0.0.1:5173`。开发模式会加载合成课程任务；正式数据库文件不会进入 Git。
+打开 `http://127.0.0.1:5173`。
 
 生产构建：
 
@@ -129,7 +112,7 @@ src/client        React 页面与组件
 src/server        Hono API、SQLite 与 AI/OAuth
 src/shared        共享模型与截止紧急度
 tests             Vitest 与 Playwright
-docs              架构、设计、开发记录和真实截图
+docs              架构、设计、开发记录和产品截图
 public            PWA manifest、图标与 Service Worker
 ```
 
@@ -138,8 +121,7 @@ public            PWA manifest、图标与 Service Worker
 - [产品定义](PRODUCT.md)
 - [设计系统](DESIGN.md)
 - [系统架构](docs/architecture/system-architecture.md)
-- [Phase 0–2 开发记录](docs/development/phase-02-core-loop.md)
-- [设计工具与版本](docs/design/tooling-setup.md)
+- [核心流程开发记录](docs/development/phase-02-core-loop.md)
 
 ## License
 
