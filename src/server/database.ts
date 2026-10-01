@@ -154,19 +154,29 @@ export class CampusDatabase {
     const tasks = this.listTasks();
     const dayStart = new Date(`${date}T00:00:00+08:00`);
     const dayEnd = new Date(`${date}T23:59:59+08:00`);
+    const timestamp = (task: Task) => task.dueAt ?? task.startAt;
     const onDay = tasks.filter((task) => {
-      const value = task.dueAt ?? task.startAt;
+      const value = timestamp(task);
       if (!value) return false;
       const time = new Date(value).getTime();
       return time >= dayStart.getTime() && time <= dayEnd.getTime();
     });
-    const dueSoonBoundary = dayStart.getTime() + 72 * 3_600_000;
+    const upcomingBoundary = dayEnd.getTime() + 72 * 3_600_000;
     return {
       date,
-      pending: onDay.filter((task) => task.status === 'pending').length,
-      completed: onDay.filter((task) => task.status === 'completed').length,
-      dueSoon: tasks.filter((task) => task.status === 'pending' && task.dueAt && new Date(task.dueAt).getTime() <= dueSoonBoundary).length,
-      total: onDay.length,
+      dueToday: onDay.filter((task) => task.status === 'pending').length,
+      completedToday: onDay.filter((task) => task.status === 'completed').length,
+      upcoming3d: tasks.filter((task) => {
+        const value = timestamp(task);
+        if (task.status !== 'pending' || !value) return false;
+        const time = new Date(value).getTime();
+        return time > dayEnd.getTime() && time <= upcomingBoundary;
+      }).length,
+      overdue: tasks.filter((task) => {
+        const value = timestamp(task);
+        return task.status === 'pending' && Boolean(value) && new Date(value!).getTime() < dayStart.getTime();
+      }).length,
+      plannedToday: onDay.length,
     };
   }
 

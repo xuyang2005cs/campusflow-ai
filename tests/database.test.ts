@@ -75,6 +75,6 @@ describe('SQLite task persistence', () => {
     const task = db.createTask({ kind: 'deadline', title: '作业', dueAt: '2026-10-01T18:00:00+08:00' });
     db.createTask({ kind: 'task', title: '其他日期', dueAt: '2026-10-03T18:00:00+08:00' });
     db.setTaskStatus(task.id, 'completed');
-    expect(db.summary('2026-10-01')).toMatchObject({ total: 1, completed: 1, pending: 0 }); db.close();
+    expect(db.summary('2026-10-01')).toMatchObject({ plannedToday: 1, completedToday: 1, dueToday: 0, upcoming3d: 1 }); db.close();
   });
 });

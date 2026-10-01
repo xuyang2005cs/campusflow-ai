@@ -46,9 +46,10 @@ export interface ImportRecord {
 
 export interface TodaySummary {
   date: string;
-  pending: number;
-  completed: number;
-  dueSoon: number;
-  total: number;
+  dueToday: number;
+  completedToday: number;
+  upcoming3d: number;
+  overdue: number;
+  plannedToday: number;
 }
 

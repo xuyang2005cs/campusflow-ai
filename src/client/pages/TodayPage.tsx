@@ -4,7 +4,6 @@ import { api } from '../api';
 import { PageError, PageLoading } from '../components/PageState';
 import { TaskCard } from '../components/TaskCard';
 import type { Task, TodaySummary } from '../../shared/types';
-import { getUrgency } from '../../shared/urgency';
 
 function dateKey(date: Date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
 
@@ -28,17 +27,22 @@ export function TodayPage() {
     const date = new Date(); date.setDate(date.getDate() + index - 2); return date;
   }), []);
 
-  const urgent = tasks.filter((task) => ['overdue', 'within24h', 'within3d'].includes(getUrgency(task.dueAt ?? task.startAt)));
-  const meetings = tasks.filter((task) => task.kind === 'meeting' || task.kind === 'event');
-  const later = tasks.filter((task) => !urgent.includes(task) && !meetings.includes(task));
-  const completedRate = summary?.total ? Math.round((summary.completed / summary.total) * 100) : 0;
+  const selectedKey = dateKey(selectedDate);
+  const selectedEnd = new Date(selectedDate); selectedEnd.setHours(23, 59, 59, 999);
+  const upcomingEnd = new Date(selectedEnd); upcomingEnd.setDate(upcomingEnd.getDate() + 3);
+  const taskTime = (task: Task) => task.dueAt ?? task.startAt;
+  const overdue = tasks.filter((task) => { const value = taskTime(task); return value && new Date(value) < new Date(`${selectedKey}T00:00:00+08:00`); });
+  const onSelectedDay = tasks.filter((task) => { const value = taskTime(task); return value && dateKey(new Date(value)) === selectedKey; });
+  const isToday = selectedKey === dateKey(new Date());
+  const upcoming = isToday ? tasks.filter((task) => { const value = taskTime(task); if (!value) return false; const time = new Date(value); return time > selectedEnd && time <= upcomingEnd; }) : [];
+  const completedRate = summary?.plannedToday ? Math.round((summary.completedToday / summary.plannedToday) * 100) : null;
 
   async function toggle(task: Task) { await api.setTaskStatus(task.id, 'completed'); await load(); }
 
   return (
     <div className="page today-page">
       <header className="today-header">
-        <div><p className="brand-name">CampusFlow AI</p><h1>{formatHeadingDate(selectedDate)}</h1><p className="welcome-copy">{summary ? `今天有 ${summary.pending} 件事需要处理` : '把今天安排清楚'}</p></div>
+        <div><p className="brand-name">CampusFlow AI</p><h1>{formatHeadingDate(selectedDate)}</h1><p className="welcome-copy">{summary ? `${isToday ? '今日' : '当天'}到期 ${summary.dueToday} 项${isToday ? ` · 未来 3 天 ${summary.upcoming3d} 项` : ''}` : '把今天安排清楚'}</p></div>
         <button className="icon-button" aria-label="查看提醒"><BellRinging size={22} aria-hidden="true" /></button>
       </header>
 
@@ -54,13 +58,14 @@ export function TodayPage() {
       {state === 'error' && <PageError message="今天的任务暂时没有加载成功" onRetry={() => void load()} />}
       {state === 'ready' && <>
         <section className="daily-summary" aria-labelledby="summary-title">
-          <div><h2 id="summary-title">今日进度</h2><p>{summary?.completed ?? 0} 项完成 · {summary?.dueSoon ?? 0} 项即将截止</p></div><strong>{completedRate}%</strong>
-          <div className="progress-track" role="progressbar" aria-valuenow={completedRate} aria-valuemin={0} aria-valuemax={100} aria-label="今日完成进度"><span style={{ width: `${completedRate}%` }} /></div>
+          <div><h2 id="summary-title">{isToday ? '今日计划完成率' : '当天计划完成率'}</h2><p>{summary?.plannedToday ? `${summary.completedToday} / ${summary.plannedToday} 项完成 · 仅统计当天计划` : '暂无当天计划 · 未来事项不计入完成率'}</p></div><strong>{completedRate === null ? '—' : `${completedRate}%`}</strong>
+          <div className="progress-track" role="progressbar" aria-valuenow={completedRate ?? 0} aria-valuetext={completedRate === null ? '暂无当天计划' : `${completedRate}%`} aria-valuemin={0} aria-valuemax={100} aria-label="当天计划完成进度"><span style={{ width: `${completedRate ?? 0}%` }} /></div>
+          <div className="summary-facts" aria-label="任务概览"><span><strong>{summary?.dueToday ?? 0}</strong> 当天待办</span><span><strong>{summary?.upcoming3d ?? 0}</strong> 未来 3 天</span><span><strong>{summary?.overdue ?? 0}</strong> 已逾期</span></div>
         </section>
-        {tasks.length === 0 ? <section className="empty-state"><CalendarDots size={34} aria-hidden="true" /><h2>这一天已经安排妥当</h2><p>可以去收件箱整理新的课程通知。</p></section> : <>
-          <TaskSection title="紧急" hint="优先处理" tasks={urgent} onToggle={toggle} />
-          <TaskSection title="会议与活动" hint="按时到场" tasks={meetings.filter((task) => !urgent.includes(task))} onToggle={toggle} />
-          <TaskSection title="之后" hint="保持节奏" tasks={later} onToggle={toggle} />
+        {overdue.length === 0 && onSelectedDay.length === 0 && upcoming.length === 0 ? <section className="empty-state"><CalendarDots size={34} aria-hidden="true" /><h2>这一天已经安排妥当</h2><p>可以去收件箱整理新的课程通知。</p></section> : <>
+          <TaskSection title="已逾期" hint="需要重新安排" tasks={overdue} onToggle={toggle} />
+          <TaskSection title={isToday ? '今天' : formatSectionDate(selectedDate)} hint={`${onSelectedDay.length} 项计划`} tasks={onSelectedDay} onToggle={toggle} />
+          {isToday && <TaskSection title="未来 3 天" hint="提前准备" tasks={upcoming} onToggle={toggle} />}
         </>}
       </>}
     </div>
@@ -74,3 +79,4 @@ function TaskSection({ title, hint, tasks, onToggle }: { title: string; hint: st
 
 function weekday(date: Date) { return new Intl.DateTimeFormat('zh-CN', { weekday: 'short' }).format(date).replace('周', ''); }
 function formatHeadingDate(date: Date) { return new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }).format(date); }
+function formatSectionDate(date: Date) { return new Intl.DateTimeFormat('zh-CN', { month: 'long', day: 'numeric' }).format(date); }

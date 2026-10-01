@@ -71,6 +71,9 @@ a { color: inherit; }
 .daily-summary > strong { align-self: center; color: var(--primary); font-size: 24px; font-variant-numeric: tabular-nums; }
 .progress-track { grid-column: 1 / -1; height: 6px; overflow: hidden; background: #dce7e4; border-radius: 999px; }
 .progress-track span { display: block; height: 100%; background: var(--primary); border-radius: inherit; }
+.summary-facts { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 2px; }
+.summary-facts span { display: grid; gap: 2px; color: var(--muted); font-size: 11px; }
+.summary-facts strong { color: var(--ink); font-size: 17px; font-variant-numeric: tabular-nums; }
 
 .task-section { margin-top: 30px; }
 .section-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
@@ -181,6 +184,9 @@ textarea:focus, input:focus, select:focus { border-color: var(--primary); outlin
 .connection-card { padding: 17px; }
 .connection-card > div { display: flex; align-items: center; gap: 11px; }
 .connection-card .button { width: 100%; margin-top: 18px; }
+.connection-actions { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; }
+.connection-actions .button { margin-top: 18px; text-decoration: none; }
+.button--quiet { color: var(--muted); background: transparent; border: 1px solid var(--line); }
 .connection-card > p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
 
