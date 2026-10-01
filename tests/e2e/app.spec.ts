@@ -15,21 +15,22 @@ test('bottom navigation opens every primary page', async ({ page }) => {
 });
 
 test('creates, completes, and restores a manual task', async ({ page }) => {
+  const title = `准备数据库课堂展示 ${Date.now()}`;
   await page.goto('/tasks');
   await page.getByRole('button', { name: '新建任务' }).click();
-  await page.getByPlaceholder('例如：提交计算机网络作业').fill('准备数据库课堂展示');
+  await page.getByPlaceholder('例如：提交计算机网络作业').fill(title);
   const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
   await page.getByLabel('截止时间').fill(tomorrow);
   await page.getByRole('button', { name: '保存到待办' }).click();
-  await expect(page.getByText('准备数据库课堂展示')).toBeVisible();
-  const card = page.locator('.task-card').filter({ hasText: '准备数据库课堂展示' });
+  await expect(page.getByText(title, { exact: true })).toBeVisible();
+  const card = page.locator('.task-card').filter({ hasText: title });
   await card.getByRole('button').click();
-  await expect(page.getByText('准备数据库课堂展示')).not.toBeVisible();
+  await expect(page.getByText(title, { exact: true })).not.toBeVisible();
   await page.goto('/completed');
-  const completedCard = page.locator('.task-card').filter({ hasText: '准备数据库课堂展示' });
+  const completedCard = page.locator('.task-card').filter({ hasText: title });
   await expect(completedCard).toBeVisible();
   await completedCard.getByRole('button').click();
-  await expect(page.getByText('准备数据库课堂展示')).not.toBeVisible();
+  await expect(page.getByText(title, { exact: true })).not.toBeVisible();
 });
 
 test('image inbox exposes editable OCR output', async ({ page }) => {

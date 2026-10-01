@@ -56,7 +56,7 @@ a { color: inherit; }
 .icon-button:hover { background: #eef5f3; }
 .icon-button--danger { color: var(--danger); }
 .icon-button--primary { color: #fff; background: var(--primary); border-color: var(--primary); }
-.icon-button--small { width: 36px; height: 36px; min-height: 36px; flex-basis: 36px; }
+.icon-button--small { width: 44px; height: 44px; min-height: 44px; flex-basis: 44px; }
 
 .date-strip { display: grid; grid-template-columns: repeat(7, minmax(42px, 1fr)); gap: 4px; margin: 0 -4px 24px; }
 .date-chip { display: flex; min-width: 0; min-height: 66px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 6px 2px; color: var(--muted); background: transparent; border: 0; border-radius: 12px; }
@@ -86,7 +86,7 @@ a { color: inherit; }
 .task-card--within3d { background: linear-gradient(90deg, var(--warning-soft), #fff 22%); }
 .task-card--within7d { background: linear-gradient(90deg, var(--caution-soft), #fff 22%); }
 .task-card.is-completed { opacity: .72; background: #f7faf9; }
-.task-card__check { display: grid; width: 36px; height: 36px; place-items: center; align-self: start; color: var(--primary); background: var(--surface); border: 1.5px solid #82aaa2; border-radius: 50%; }
+.task-card__check { display: grid; width: 44px; height: 44px; place-items: center; align-self: start; color: var(--primary); background: var(--surface); border: 1.5px solid #82aaa2; border-radius: 50%; }
 .task-card__check:hover { color: #fff; background: var(--primary); border-color: var(--primary); }
 .task-card__content { min-width: 0; }
 .task-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
@@ -131,7 +131,7 @@ textarea { min-height: 120px; padding: 12px 13px; resize: vertical; line-height:
 input, select { min-height: 46px; padding: 10px 12px; }
 textarea:focus, input:focus, select:focus { border-color: var(--primary); outline: 3px solid rgba(15,118,110,.13); }
 .input-foot { display: flex; justify-content: space-between; margin-top: 8px; color: var(--muted); font-size: 12px; }
-.text-button { min-height: 36px; padding: 4px 8px; color: var(--primary); background: transparent; border: 0; font-weight: 700; }
+.text-button { min-height: 44px; padding: 6px 8px; color: var(--primary); background: transparent; border: 0; font-weight: 700; }
 .upload-zone { display: grid; width: 100%; min-height: 154px; place-items: center; align-content: center; gap: 7px; padding: 20px; color: var(--primary); background: #f2faf8; border: 1px dashed #7cbcb1; border-radius: 12px; text-align: center; }
 .upload-zone span { color: var(--muted); font-size: 12px; font-weight: 500; }
 .image-preview { display: grid; gap: 8px; place-items: center; }
