@@ -4,6 +4,8 @@ coverage/
 .agents/
 .playwright-cli/
 output/
+test-results/
+playwright-report/
 .env
 .env.*
 !.env.example
