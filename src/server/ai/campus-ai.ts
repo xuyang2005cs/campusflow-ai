@@ -126,6 +126,14 @@ export class CampusAi {
   private friendlyLoginError(message: string): string {
     if (/cancel|denied/i.test(message)) return '你已取消 ChatGPT 授权';
     if (/timeout/i.test(message)) return '授权等待超时，请重新连接';
+    if (/country|region|territory.+not supported/i.test(message)) return '当前网络区域不支持 OpenAI 凭据交换';
+    if (/invalid_client|client.+unavailable/i.test(message)) return 'OpenAI 尚未为当前账号启用此登录客户端';
+    const tokenStatus = message.match(/token request failed \((\d{3})\)/i)?.[1];
+    if (tokenStatus) return `OpenAI 授权码交换失败（HTTP ${tokenStatus}）`;
+    if (/id token/i.test(message)) return 'OpenAI 授权响应缺少 ID token';
+    if (/scope|chatgpt\.tokens\.use\.direct/i.test(message)) return 'OpenAI 授权范围不完整';
+    if (/credential|auth\.json/i.test(message)) return '本机 OAuth 凭据保存失败';
+    if (/state mismatch/i.test(message)) return 'OAuth 会话已过期，请重新连接';
     return 'ChatGPT 授权未完成，请重试';
   }
 }
